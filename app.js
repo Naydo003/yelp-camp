@@ -22,7 +22,7 @@ const helmet = require('helmet');
 const mongoSanitize = require('express-mongo-sanitize');   // mongoSanitize stops mongo injection in query strings by users.
 
 // MRC
-
+// Bad way to connect to db. Need async connection and make app.listen run after db connection.
 mongoose.connect('mongodb://localhost:27017/yelp-camp', {
     useNewUrlParser: true,
     useCreateIndex: true,
@@ -35,6 +35,10 @@ const db = mongoose.connection;
 db.on("error", console.error.bind(console, "connection error:"));
 db.once("open", () => {
     console.log("Database connected");
+    app.listen(3000, () => {
+        console.log('Serving on port 3000')
+    })
+
 });
 
 const app = express();
@@ -159,6 +163,7 @@ app.use((err, req, res, next)=>{
   res.status(statusCode).render('error.ejs', { err });
 })
 
-app.listen(3000, () => {
-    console.log('Serving on port 3000')
-})
+// Server activation moved to db connection so than only occurs once db connected. Could use an event emitter also.
+// app.listen(3000, () => {
+//     console.log('Serving on port 3000')
+// })
